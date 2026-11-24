@@ -1,0 +1,374 @@
+{
+  "info": {
+    "_postman_id": "krmu-cms-api-v1",
+    "name": "K.R. Mangalam University - Campus Management System API",
+    "description": "Comprehensive Postman test collection covering Success, Validation-Failure, and Unauthorized-Access test cases across Authentication, Students, Faculty, Courses, Sections, Attendance, and Announcements.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "facultyToken", "value": "", "type": "string" },
+    { "key": "studentToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "01 - Authentication",
+      "item": [
+        {
+          "name": "1. Admin Login [SUCCESS - 200]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Login returns accessToken and ADMIN role', function () {",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data.user.role).to.eql('ADMIN');",
+                  "    pm.collectionVariables.set('adminToken', jsonData.data.accessToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@university.edu\",\n  \"password\": \"Admin@123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "2. Faculty Login [SUCCESS - 200]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Login returns FACULTY role', function () {",
+                  "    pm.expect(jsonData.data.user.role).to.eql('FACULTY');",
+                  "    pm.collectionVariables.set('facultyToken', jsonData.data.accessToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"james.wilson@university.edu\",\n  \"password\": \"Faculty@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "3. Student Login [SUCCESS - 200]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Login returns STUDENT role', function () {",
+                  "    pm.expect(jsonData.data.user.role).to.eql('STUDENT');",
+                  "    pm.collectionVariables.set('studentToken', jsonData.data.accessToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student01@university.edu\",\n  \"password\": \"Student@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "4. Register Student [SUCCESS - 201]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201 Created', function () { pm.response.to.have.status(201); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Student created with registration number', function () {",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data.user.role).to.eql('STUDENT');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Postman Student\",\n  \"email\": \"test.student." + Date.now() + "@krmu.edu.in\",\n  \"registrationNumber\": \"24TEST" + Math.floor(Math.random() * 10000) + "\",\n  \"department\": \"School of Engineering & Technology\",\n  \"semester\": 1,\n  \"password\": \"Student@123\",\n  \"confirmPassword\": \"Student@123\",\n  \"role\": \"STUDENT\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "5. Register Public Admin [UNAUTHORIZED/FORBIDDEN - 400]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400 Bad Request', function () { pm.response.to.have.status(400); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Blocks public ADMIN creation', function () {",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unauthorized Hacker\",\n  \"email\": \"hacker@krmu.edu.in\",\n  \"password\": \"Hacked@123\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "6. Login Invalid Password [UNAUTHORIZED - 401]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 401 Unauthorized', function () { pm.response.to.have.status(401); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Returns credentials failure message', function () {",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@university.edu\",\n  \"password\": \"WrongPassword!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "7. Get Me Profile [SUCCESS - 200]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Returns authenticated profile without password', function () {",
+                  "    pm.expect(jsonData.data.password).to.be.undefined;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "8. Access Protected Route Without Token [UNAUTHORIZED - 401]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 401 Unauthorized', function () { pm.response.to.have.status(401); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Student & Academic Management",
+      "item": [
+        {
+          "name": "1. Get All Students (Admin) [SUCCESS - 200]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Returns paginated student list', function () {",
+                  "    pm.expect(jsonData.data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/students", "host": ["{{baseUrl}}"], "path": ["students"] }
+          }
+        },
+        {
+          "name": "2. Student Token Accessing Admin Student Route [FORBIDDEN - 403]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 403 Forbidden', function () { pm.response.to.have.status(403); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{studentToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Should Fail\",\n  \"email\": \"fail@krmu.edu.in\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/students", "host": ["{{baseUrl}}"], "path": ["students"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Courses & Sections",
+      "item": [
+        {
+          "name": "1. Get All Courses [SUCCESS - 200]",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/courses", "host": ["{{baseUrl}}"], "path": ["courses"] }
+          }
+        },
+        {
+          "name": "2. Get All Sections [SUCCESS - 200]",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/sections", "host": ["{{baseUrl}}"], "path": ["sections"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Attendance & Sessions",
+      "item": [
+        {
+          "name": "1. Get Class Sessions [SUCCESS - 200]",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{facultyToken}}" }],
+            "url": { "raw": "{{baseUrl}}/attendance/sessions", "host": ["{{baseUrl}}"], "path": ["attendance", "sessions"] }
+          }
+        },
+        {
+          "name": "2. Mark Attendance Without Session ID [VALIDATION_FAILURE - 404]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404 Not Found', function () { pm.response.to.have.status(404); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{facultyToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classSessionId\": \"600000000000000000000000\",\n  \"attendanceData\": []\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/attendance/mark", "host": ["{{baseUrl}}"], "path": ["attendance", "mark"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Analytics Aggregations",
+      "item": [
+        {
+          "name": "1. Admin Dashboard Analytics Pipeline [SUCCESS - 200]",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Aggregates stats correctly', function () {",
+                  "    pm.expect(jsonData.data.stats).to.have.property('totalStudents');",
+                  "    pm.expect(jsonData.data.stats).to.have.property('averageAttendance');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/dashboard/admin", "host": ["{{baseUrl}}"], "path": ["dashboard", "admin"] }
+          }
+        }
+      ]
+    }
+  ]
+}
